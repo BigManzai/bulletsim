@@ -1,0 +1,65 @@
+Das OpenSimulator BulletSPlugin erwartet die Verwendung einer "BulletSim.dll", die das bereitstellt
+Verknüpfung mit der Bullet-Physik-Engine.
+
+BulletSim.dll ist in C ++ geschrieben und statisch mit der Bullet-Engine verknüpft.
+
+BulletSim.dll muss separat als OpenSimulator-Build kompiliert werden
+Umgebung erstellt nur den C # -Code.
+
+Für Windows sind die Schritte:
+
+1) Holen Sie sich die neueste Version von 
+		GitHub: https://github.com/bulletphysics/bullet3
+        cd trunk/unmanaged/BulletSim
+        git clone https://github.com/bulletphysics/bullet3 bullet3
+
+    Zum jetzigen Zeitpunkt (7. August 2017) ist die Bullet-Entwicklung hauptsächlich 
+	in vollem Gange Fehlerbehebungen im v2 branch und neue Entwicklungen sind im Gange
+    auf einem neuen v3 branch. Wenn Bullet auf v3 übergeht, wird BulletSim
+    wird wahrscheinlich nicht erstellen oder verknüpfen und erfordert Nacharbeit.
+    In der Zwischenzeit sollte jede der v2.8 + -Versionen funktionieren.
+
+2) Wenden Sie alle Patches für die bullet an:
+	cd bullet3 ; for file in ../*.patch ; do cat $file | patch -p1 ; done
+
+3) Bullet bauen
+3a) Windows:
+    Die Bullet-Distribution enthält eine Instanz von PreMake (https://premake.github.io/).
+    um die Visual Studio-Projektdateien zu erstellen.
+    Das Skript buildBulletVS.bat ruft premake auf und generiert die Projektdateien.
+    Ab August 2017 funktionierte die Premake-Version 4, wurde jedoch nur für VS2010 (v100) generiert.
+    Ich baue die BulletSim-Bibliotheken mit VS2012 (v110) aus Gründen der Abwärtskompatibilität.
+    Ich habe VS2012 die VS2010-Projektdateien für VS2012 aktualisieren lassen.
+
+    Öffnen Sie die Projektdateien, sobald sie erstellt wurden
+    "bullet3/build3/vs2010/0_Bullet3Solution.sln" mit VS2012
+    und führen Sie eine Stapelkompilierung für eine Release-Version für 'Win32' und 'x64' durch.
+
+3b) Linux und IOS:
+    (http://bulletphysics.org/mediawiki-1.5.8/index.php/Installation).
+    Das Skript "buildBulletCMake.sh" verfügt über die entsprechende cmake und Kompilierung
+    Befehle für Linux und IOS.
+    (Für 64-Bit-Systeme müssen Sie auch das cmake-Flag -DCMAKE_CXX_FLAGS = "- fPIC" hinzufügen.)
+    (Für Mac OSX-Systeme müssen Sie auch das cmake-Flag hinzufügen
+        -DCMAKE_OSX_ARCHITECTURES = i386, da Mono unter OSX als 32-Bit-Prozess ausgeführt wird)
+    Das Skript erstellt statische Bullet-Bibliotheken und kopiert sie in lokale Verzeichnisse.
+
+4) Erstellen Sie BulletSim
+4a) Windows:
+    Verwenden Sie VS2012, um "BulletSim.sln" zu öffnen. Build Release-Version für 'Win32'
+    und 'x64'. Die resultierenden DLLs befinden sich in "Release/BulletSim.dll".
+    und ""x64/Release/BulletSim.dll". Diese Dateien werden kopiert nach
+    "bin/lib32/BulletSim.dll" und "bin/lib64/BulletSim.dll" in das entsprechende
+    OpenSim Verzeichnis.
+
+4b) Linux und IOS:
+    Verwenden Sie das 'Makefile', um BulletSim zu erstellen. Ein einfaches 'make' sollte es bauen.
+        
+    Kopieren Sie unter Linux "libBulletSim.so" in den OpenSimulator "bin / lib32" oder "bin / lib64".
+    Verzeichnisse abhängig von der Architektur Ihres Systems.
+    Kopieren Sie unter Mac OSX "libBulletSim.dylib" in das OpenSimulator-Verzeichnis "bin / lib32"
+
+
+Dies wurde mit Bullet v2.86 entwickelt. Wenn Sie eine andere Version verwenden, werden Sie
+Die Verzeichnisse include und library müssen für die BulletSim-Kompilierung geändert werden.
+
